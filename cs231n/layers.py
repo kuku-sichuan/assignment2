@@ -181,7 +181,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     out = gamma * x_norm + beta
     running_mean = momentum * running_mean + (1-momentum) * sample_mean
     running_var = momentum * running_var + (1-momentum) * sample_var
-    catch = (x_norm,gamma,beta,sample_mean,sample_var,x,eps) 	
+    cache = (x_norm,gamma,beta,sample_mean,sample_var,x,eps)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -237,13 +237,13 @@ def batchnorm_backward(dout, cache):
   
   dsample_var = -0.5 * np.sum(dx_norm * x_mu,axis = 0,keepdims = True) *\
                 sample_std_inv**3
-  dsample_mean = np.sum(dx_norm * sample_std_inv,axis = 0,keepdims = True) + 2*\
+  dsample_mean = -1.0 * np.sum(dx_norm * sample_std_inv,axis = 0,keepdims = True) + 2*\
                 dsample_var * np.mean(x_mu,axis=0,keepdims=True)
   
   dx1 = dx_norm * sample_std_inv
   dx2 = 2.0 / N * dsample_var * x_mu
   dx = dx1 + dx2 + 1.0 / N * dsample_mean
-  
+
   dgamma = np.sum(dout * x_norm,axis = 0,keepdims = True)
   dbeta = np.sum(dout,axis=0,keepdims=True)
   
@@ -276,6 +276,8 @@ def batchnorm_backward_alt(dout, cache):
   # should be able to compute gradients with respect to the inputs in a       #
   # single statement; our implementation fits on a single 80-character line.  #
   #############################################################################
+  
+  # there need be compare with the answer in the net!
   x_norm,gamma,beta,sample_mean,sample_var,x,eps = cache
   sample_back_inv = dout * gamma * 1.0 / np.sqrt(sample_var + eps)
   dx1 = sample_back_inv - np.mean(sample_back_inv * x_norm,axis = 0,
@@ -322,10 +324,8 @@ def dropout_forward(x, dropout_param):
     # TODO: Implement the training phase forward pass for inverted dropout.   #
     # Store the dropout mask in the mask variable.                            #
     ###########################################################################
-    mask = np.random.binomial(1,p=1-p,size=x.shape)
-    x *= mask
-    x /= (1-p)
-    out = x
+    mask = (np.random.rand(*x.shape) < p) / p
+    out=x * mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################
@@ -360,7 +360,7 @@ def dropout_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the training phase backward pass for inverted dropout.  #
     ###########################################################################
-    dx = dout * mask * (1-dropout_param['p'])
+    dx = dout * mask
     ###########################################################################
     #                            END OF YOUR CODE                             #
     ###########################################################################

@@ -107,6 +107,7 @@ class Solver(object):
     self.y_val = data['y_val']
     
     # Unpack keyword arguments
+	# learn and imitate how he do this!the second param is the default value!
     self.update_rule = kwargs.pop('update_rule', 'sgd')
     self.optim_config = kwargs.pop('optim_config', {})
     self.lr_decay = kwargs.pop('lr_decay', 1.0)
@@ -118,6 +119,7 @@ class Solver(object):
 
     # Throw an error if there are extra keyword arguments
     if len(kwargs) > 0:
+	# this implementation which deserve to learn
       extra = ', '.join('"%s"' % k for k in kwargs.keys())
       raise ValueError('Unrecognized arguments %s' % extra)
 
@@ -136,6 +138,7 @@ class Solver(object):
     manually.
     """
     # Set up some variables for book-keeping
+	# which value we need to care and track!
     self.epoch = 0
     self.best_val_acc = 0
     self.best_params = {}
@@ -157,6 +160,7 @@ class Solver(object):
     """
     # Make a minibatch of training data
     num_train = self.X_train.shape[0]
+	# random choose the samples
     batch_mask = np.random.choice(num_train, self.batch_size)
     X_batch = self.X_train[batch_mask]
     y_batch = self.y_train[batch_mask]
@@ -169,6 +173,7 @@ class Solver(object):
     for p, w in self.model.params.iteritems():
       dw = grads[p]
       config = self.optim_configs[p]
+	  
       next_w, next_config = self.update_rule(w, dw, config)
       self.model.params[p] = next_w
       self.optim_configs[p] = next_config
@@ -204,6 +209,7 @@ class Solver(object):
     if N % batch_size != 0:
       num_batches += 1
     y_pred = []
+	# check the accuracy that choose the samples by the order!
     for i in xrange(num_batches):
       start = i * batch_size
       end = (i + 1) * batch_size
@@ -220,6 +226,7 @@ class Solver(object):
     Run optimization to train the model.
     """
     num_train = self.X_train.shape[0]
+	# it has a very good robustness.
     iterations_per_epoch = max(num_train / self.batch_size, 1)
     num_iterations = self.num_epochs * iterations_per_epoch
 
@@ -242,7 +249,7 @@ class Solver(object):
       # Check train and val accuracy on the first iteration, the last
       # iteration, and at the end of each epoch.
       first_it = (t == 0)
-      last_it = (t == num_iterations + 1)
+      last_it = (t == num_iterations - 1) # I modificate there "-" replace "+"
       if first_it or last_it or epoch_end:
         train_acc = self.check_accuracy(self.X_train, self.y_train,
                                         num_samples=1000)
