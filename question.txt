@@ -1,2 +1,5 @@
 1. 对于中间的参数更新，要不要除以N，应该是不需要的。从公式的推导可以看出。
 2. 总结一下，题中所有的检查是如何实现！
+3. 弄清楚conv的fast版本是如何实现的。
+4. 十分有趣：在full-connected和conv_connected中batch_normalization它们实现的不同：
+在full_connected中我们是每一个神经元的值都有不同的gamma和beta，但是
